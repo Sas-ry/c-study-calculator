@@ -14,21 +14,6 @@ int analyze_number(void) {
     return load_result;
 }
 
-int calculation_add_sub(void) {
-    int load_result;
-    load_result = analyze_number();
-    while(in_num_char[load_point] == '+' || in_num_char[load_point] == '-') {
-        if(in_num_char[load_point] == '+') {
-            load_point++;
-            load_result += analyze_number();
-        } else if (in_num_char[load_point] == '-') {
-            load_point++;
-            load_result -= analyze_number();
-        }
-    }
-    return load_result;
-}
-
 int calculation_mul_div(void) {
     int load_result;
     load_result = analyze_number();
@@ -44,10 +29,25 @@ int calculation_mul_div(void) {
     return load_result;
 }
 
+int calculation_add_sub(void) {
+    int load_result;
+    load_result = calculation_mul_div();
+    while(in_num_char[load_point] == '+' || in_num_char[load_point] == '-') {
+        if(in_num_char[load_point] == '+') {
+            load_point++;
+            load_result += calculation_mul_div();
+        } else if (in_num_char[load_point] == '-') {
+            load_point++;
+            load_result -= calculation_mul_div();
+        }
+    }
+    return load_result;
+}
+
 int main(void) {
     printf("数字を入れて下さい\n");
     scanf("%255s", &in_num_char);
-    int load_result = calculation_mul_div();
+    int load_result = calculation_add_sub();
     printf("入力された値は：%d\n", load_result);
 
 }
