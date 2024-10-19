@@ -14,9 +14,7 @@ int analyze_number(void) {
     return load_result;
 }
 
-int main(void) {
-    printf("数字を入れて下さい\n");
-    scanf("%255s", &in_num_char);
+int calculation(void) {
     int load_result;
     load_result = analyze_number();
     while(in_num_char[load_point] == '+' || in_num_char[load_point] == '-') {
@@ -28,6 +26,13 @@ int main(void) {
             load_result -= analyze_number();
         }
     }
+    return load_result;
+}
+
+int main(void) {
+    printf("数字を入れて下さい\n");
+    scanf("%255s", &in_num_char);
+    int load_result = calculation();
     printf("入力された値は：%d\n", load_result);
 
 }
