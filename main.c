@@ -19,7 +19,7 @@ int main(void) {
     scanf("%255s", &in_num_char);
     int load_result;
     load_result = analyze_number();
-    if(in_num_char[load_point] == '+') {
+    while(in_num_char[load_point] != '\0') {
         load_point++;
         load_result += analyze_number();
     }
