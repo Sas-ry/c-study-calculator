@@ -53,13 +53,16 @@ int analyze_parentheses(void) {
 int calculation_mul_div(void) {
     int load_result;
     load_result = analyze_parentheses();
-    while(input_number_info[load_point] == '*' || input_number_info[load_point] == '/') {
+    while(input_number_info[load_point] == '*' || input_number_info[load_point] == '/' || input_number_info[load_point] == '%') {
         if(input_number_info[load_point] == '*') {
             load_point++;
             load_result *= analyze_parentheses();
         } else if (input_number_info[load_point] == '/') {
             load_point++;
             load_result /= analyze_parentheses();
+        } else if (input_number_info[load_point] == '%') {
+            load_point++;
+            load_result %= analyze_parentheses();
         }
     }
     return load_result;
