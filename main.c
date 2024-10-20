@@ -28,16 +28,32 @@ int analyze_number(void) {
     return load_result;
 }
 
+int calculation_add_sub();
+
+int analyze_parentheses(void) {
+    int load_result;
+    if (in_num_char[load_point] == '(') {
+        load_point++;
+        load_result = calculation_add_sub();
+        if (in_num_char[load_point] == ')') {
+            load_point++;
+        }
+    } else {
+        load_result = analyze_number();
+    }
+    return load_result;
+}
+
 int calculation_mul_div(void) {
     int load_result;
-    load_result = analyze_number();
+    load_result = analyze_parentheses();
     while(in_num_char[load_point] == '*' || in_num_char[load_point] == '/') {
         if(in_num_char[load_point] == '*') {
             load_point++;
-            load_result *= analyze_number();
+            load_result *= analyze_parentheses();
         } else if (in_num_char[load_point] == '/') {
             load_point++;
-            load_result /= analyze_number();
+            load_result /= analyze_parentheses();
         }
     }
     return load_result;
@@ -58,23 +74,9 @@ int calculation_add_sub(void) {
     return load_result;
 }
 
-int analyze_parentheses(void) {
-    int load_result;
-    if (in_num_char[load_point] == '(') {
-        load_point++;
-        load_result = calculation_add_sub();
-        if (in_num_char[load_point] == ')') {
-            load_point++;
-        }
-    } else {
-        load_result = analyze_number();
-    }
-    return load_result;
-}
-
 int main(void) {
     printf("数字を入れて下さい\n");
     scanf("%255s", &in_num_char);
-    int load_result = analyze_parentheses();
+    int load_result = calculation_add_sub();
     printf("入力された値は：%d\n", load_result);
 }
