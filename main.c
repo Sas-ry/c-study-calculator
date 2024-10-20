@@ -1,57 +1,63 @@
 #include <stdio.h>
 #include <string.h>
 
+// 読み込み位置
 int load_point = 0;
-char in_num_char[256];
+// 入力情報
+char input_number_info[256];
 
-int analyze_number(void) {
+// 数字の解析
+int analyze_numbers(void) {
     int load_result = 0;
-    if (in_num_char[load_point] == '+' || in_num_char[load_point] == '-') {
-        if (in_num_char[load_point] == '-') {
-            load_point++;
-            for(int i = 0; '0' <= in_num_char[load_point] && '9' >= in_num_char[load_point]; load_point++) {
-                load_result = load_result * 10 + in_num_char[load_point] - '0'; 
-            }
-            load_result *= -1;
-        } else {
-            load_point++;
-            for(int i = 0; '0' <= in_num_char[load_point] && '9' >= in_num_char[load_point]; load_point++) {
-                load_result = load_result * 10 + in_num_char[load_point] - '0'; 
-            }
+    // 数字の先頭に「-」が付いている場合
+    if (input_number_info[load_point] == '-') {
+        load_point++;
+        for(int i = 0; '0' <= input_number_info[load_point] && '9' >= input_number_info[load_point]; load_point++) {
+            load_result = load_result * 10 + input_number_info[load_point] - '0'; 
         }
+        load_result *= -1;
+    // 数字の先頭に「+」が付いている場合
+    } else if(input_number_info[load_point] == '+') {
+        load_point++;
+        for(int i = 0; '0' <= input_number_info[load_point] && '9' >= input_number_info[load_point]; load_point++) {
+            load_result = load_result * 10 + input_number_info[load_point] - '0'; 
+        }
+    // 数字の先頭に何も付いていない場合
     } else {
-        for(int i = 0; '0' <= in_num_char[load_point] && '9' >= in_num_char[load_point]; load_point++) {
-            load_result = load_result * 10 + in_num_char[load_point] - '0'; 
+        for(int i = 0; '0' <= input_number_info[load_point] && '9' >= input_number_info[load_point]; load_point++) {
+            load_result = load_result * 10 + input_number_info[load_point] - '0'; 
         }
     }
-    
     return load_result;
 }
 
+// 未定義によるコンパイルエラー回避
 int calculation_add_sub();
 
+// 括弧がある場合の処理
 int analyze_parentheses(void) {
     int load_result;
-    if (in_num_char[load_point] == '(') {
+    if (input_number_info[load_point] == '(') {
         load_point++;
         load_result = calculation_add_sub();
-        if (in_num_char[load_point] == ')') {
+        if (input_number_info[load_point] == ')') {
             load_point++;
         }
     } else {
-        load_result = analyze_number();
+        load_result = analyze_numbers();
     }
     return load_result;
 }
 
+// 掛け算と割り算
 int calculation_mul_div(void) {
     int load_result;
     load_result = analyze_parentheses();
-    while(in_num_char[load_point] == '*' || in_num_char[load_point] == '/') {
-        if(in_num_char[load_point] == '*') {
+    while(input_number_info[load_point] == '*' || input_number_info[load_point] == '/') {
+        if(input_number_info[load_point] == '*') {
             load_point++;
             load_result *= analyze_parentheses();
-        } else if (in_num_char[load_point] == '/') {
+        } else if (input_number_info[load_point] == '/') {
             load_point++;
             load_result /= analyze_parentheses();
         }
@@ -59,14 +65,15 @@ int calculation_mul_div(void) {
     return load_result;
 }
 
+// 足し算と引き算
 int calculation_add_sub(void) {
     int load_result;
     load_result = calculation_mul_div();
-    while(in_num_char[load_point] == '+' || in_num_char[load_point] == '-') {
-        if(in_num_char[load_point] == '+') {
+    while(input_number_info[load_point] == '+' || input_number_info[load_point] == '-') {
+        if(input_number_info[load_point] == '+') {
             load_point++;
             load_result += calculation_mul_div();
-        } else if (in_num_char[load_point] == '-') {
+        } else if (input_number_info[load_point] == '-') {
             load_point++;
             load_result -= calculation_mul_div();
         }
@@ -76,7 +83,7 @@ int calculation_add_sub(void) {
 
 int main(void) {
     printf("数字を入れて下さい\n");
-    scanf("%255s", &in_num_char);
+    scanf("%255s", &input_number_info);
     int load_result = calculation_add_sub();
     printf("入力された値は：%d\n", load_result);
 }
