@@ -81,9 +81,26 @@ int calculation_add_sub(void) {
     return load_result;
 }
 
+int exit_check(void) {
+    if (strcmp(input_number_info, "quit") == 0 || strcmp(input_number_info, "exit") == 0) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
 int main(void) {
-    printf("数字を入れて下さい\n");
-    scanf("%255s", &input_number_info);
-    int load_result = calculation_add_sub();
-    printf("入力された値は：%d\n", load_result);
+    for(;;) {
+        printf("\n数字を入れて下さい\n");
+        scanf("%255s", &input_number_info);
+        int exit_check_res = exit_check();
+        if (exit_check_res == 0) {
+            int load_result = calculation_add_sub();
+            printf("入力された値は：%d\n", load_result);
+            load_point = 0;
+        } else {
+            printf("計算を終了します\n");
+            break;
+        }
+    }
 }
