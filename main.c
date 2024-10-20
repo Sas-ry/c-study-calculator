@@ -33,13 +33,14 @@ int analyze_numbers(void) {
 
 // 未定義によるコンパイルエラー回避
 int calculation_add_sub();
+int calculation_or();
 
 // 括弧がある場合の処理
 int analyze_parentheses(void) {
     int load_result;
     if (input_number_info[load_point] == '(') {
         load_point++;
-        load_result = calculation_add_sub();
+        load_result = calculation_or();
         if (input_number_info[load_point] == ')') {
             load_point++;
         }
@@ -84,6 +85,42 @@ int calculation_add_sub(void) {
     return load_result;
 }
 
+// ビット演算（AND）
+int calculation_and(void) {
+    int load_result;
+    load_result = calculation_add_sub();
+    while(input_number_info[load_point] == '&') {
+        load_point++;
+        int temp_result = calculation_add_sub();
+        load_result = load_result & temp_result;
+    }
+    return load_result;
+}
+
+// ビット演算（XOR）
+int calculation_xor(void) {
+    int load_result;
+    load_result = calculation_and();
+    while(input_number_info[load_point] == '^') {
+        load_point++;
+        int temp_result = calculation_and();
+        load_result = load_result ^ temp_result;
+    }
+    return load_result;
+}
+
+// ビット演算（or）
+int calculation_or(void) {
+    int load_result;
+    load_result = calculation_xor();
+    while(input_number_info[load_point] == '|') {
+        load_point++;
+        int temp_result = calculation_xor();
+        load_result = load_result | temp_result;
+    }
+    return load_result;
+}
+
 int exit_check(void) {
     if (strcmp(input_number_info, "quit") == 0 || strcmp(input_number_info, "exit") == 0) {
         return 1;
@@ -98,7 +135,7 @@ int main(void) {
         scanf("%255s", &input_number_info);
         int exit_check_res = exit_check();
         if (exit_check_res == 0) {
-            int load_result = calculation_add_sub();
+            int load_result = calculation_or();
             printf("入力された値は：%d\n", load_result);
             load_point = 0;
         } else {
