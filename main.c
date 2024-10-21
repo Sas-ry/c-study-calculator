@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 // 読み込み位置
 int load_point = 0;
@@ -50,6 +52,51 @@ int analyze_parentheses(void) {
     return load_result;
 }
 
+/*
+    演算子が重なっていないこと,演算子の後ろが空白では無いことを確認
+    正常：0
+    異常：1
+*/
+void double_operator_error_check(void) {
+    int next_point = load_point;
+    if (!isdigit((unsigned char)input_number_info[next_point]) && input_number_info[load_point] != '-') {
+        printf("\n計算式が不正です\n");
+        printf("処理を終了します\n");
+        exit(1);
+    }
+}
+
+/*
+    数字または演算子以外の文字列が含まれていないことを確認
+    正常：0
+    異常：1
+*/
+void invalid_value_error_check(void) {
+    // チェック対象外とする演算子
+    int allowed_value[256];
+    allowed_value['+'] = 1;
+    allowed_value['-'] = 1;
+    allowed_value['*'] = 1;
+    allowed_value['/'] = 1;
+    allowed_value['%'] = 1;
+    allowed_value['&'] = 1;
+    allowed_value['|'] = 1;
+    allowed_value['^'] = 1;
+    allowed_value['('] = 1;
+
+    int i = 0;
+    while (input_number_info[i] != '\0') {
+        if (!isdigit(input_number_info[i]) 
+        && input_number_info[i] != '\n'
+        && !allowed_value[(unsigned char)input_number_info[i]]) {
+            printf("\n数字以外の文字列が含まれています\n");
+            printf("処理を終了します\n");
+            exit(1);
+        }
+        i++;
+    }
+}
+
 // 掛け算と割り算
 int calculation_mul_div(void) {
     int load_result;
@@ -57,12 +104,15 @@ int calculation_mul_div(void) {
     while(input_number_info[load_point] == '*' || input_number_info[load_point] == '/' || input_number_info[load_point] == '%') {
         if(input_number_info[load_point] == '*') {
             load_point++;
+            double_operator_error_check();
             load_result *= analyze_parentheses();
         } else if (input_number_info[load_point] == '/') {
             load_point++;
+            double_operator_error_check();
             load_result /= analyze_parentheses();
         } else if (input_number_info[load_point] == '%') {
             load_point++;
+            double_operator_error_check();
             load_result %= analyze_parentheses();
         }
     }
@@ -76,9 +126,11 @@ int calculation_add_sub(void) {
     while(input_number_info[load_point] == '+' || input_number_info[load_point] == '-') {
         if(input_number_info[load_point] == '+') {
             load_point++;
+            double_operator_error_check();
             load_result += calculation_mul_div();
         } else if (input_number_info[load_point] == '-') {
             load_point++;
+            double_operator_error_check();
             load_result -= calculation_mul_div();
         }
     }
@@ -91,6 +143,7 @@ int calculation_and(void) {
     load_result = calculation_add_sub();
     while(input_number_info[load_point] == '&') {
         load_point++;
+        double_operator_error_check();
         int temp_result = calculation_add_sub();
         load_result = load_result & temp_result;
     }
@@ -103,6 +156,7 @@ int calculation_xor(void) {
     load_result = calculation_and();
     while(input_number_info[load_point] == '^') {
         load_point++;
+        double_operator_error_check();
         int temp_result = calculation_and();
         load_result = load_result ^ temp_result;
     }
@@ -115,6 +169,7 @@ int calculation_or(void) {
     load_result = calculation_xor();
     while(input_number_info[load_point] == '|') {
         load_point++;
+        double_operator_error_check();
         int temp_result = calculation_xor();
         load_result = load_result | temp_result;
     }
@@ -135,6 +190,7 @@ int main(void) {
         scanf("%255s", &input_number_info);
         int exit_check_res = exit_check();
         if (exit_check_res == 0) {
+            invalid_value_error_check();
             int load_result = calculation_or();
             printf("入力された値は：%d\n", load_result);
             load_point = 0;
