@@ -83,6 +83,7 @@ void invalid_value_error_check(void) {
     allowed_value['|'] = 1;
     allowed_value['^'] = 1;
     allowed_value['('] = 1;
+    allowed_value[' '] = 1;
 
     int i = 0;
     while (input_number_info[i] != '\0') {
@@ -184,13 +185,26 @@ int exit_check(void) {
     }
 }
 
+void remove_spaces(void) {
+    int i = 0;
+    int j = 0;
+    for (int i = 0; i < 256; i++) {
+        if (input_number_info[i] != ' ') {
+            input_number_info[j] = input_number_info[i];
+            j++;
+        }
+    }
+    input_number_info[j] = '\0'; // 文字列の終端を設定
+}
+
 int main(void) {
     for(;;) {
         printf("\n数字を入れて下さい\n");
-        scanf("%255s", &input_number_info);
+        scanf("%255[^\n]%*c", &input_number_info);
         int exit_check_res = exit_check();
         if (exit_check_res == 0) {
             invalid_value_error_check();
+            remove_spaces();
             int load_result = calculation_or();
             printf("入力された値は：%d\n", load_result);
             load_point = 0;
