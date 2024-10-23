@@ -3,10 +3,21 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+// 変数リスト
+typedef struct VarList {
+    char key[26];
+    char value[26];
+} VarList;
+
+VarList variable_list;
+
 // 読み込み位置
 int load_point = 0;
 // 入力情報
 char input_number_info[256];
+
+// 変数代入フラグ
+int var_def_flag = 0;
 
 // 数字の解析
 int analyze_numbers(void) {
@@ -85,7 +96,7 @@ void invalid_value_error_check(void) {
     allowed_value['('] = 1;
     allowed_value[' '] = 1;
 
-    int i = 0;
+    int i = load_point;
     while (input_number_info[i] != '\0') {
         if (!isdigit(input_number_info[i]) 
         && input_number_info[i] != '\n'
@@ -185,8 +196,58 @@ int exit_check(void) {
     }
 }
 
+
+// 変数フラグの有効化確認
+void variable_flag_check(void) {
+    // 計算結果を変数に入れる必要があるか確認
+    if ((input_number_info[0] >= 'a' && input_number_info[0] <= 'z') && input_number_info[1] == '=') {
+        // 変数フラグを有効化
+        var_def_flag = 1;
+        // 配列のポイントを代入用の「=」の後ろまで進める
+        load_point = 2;
+    }
+}
+
+// 式の中にある変数を置き換える
+void variable_conversion(void) {
+    // 現時点での読み込み位置から式の解析をするため変数にload_pointを代入
+    int i = load_point;
+    for (i; i < 256; i++) {
+        // 入力された文字列の中に変数が含まれているか確認
+        if (input_number_info[i] >= 'a' && input_number_info[i] <= 'z') {
+            // 変数が2文字以上ではないことを確認
+            if (input_number_info[i + 1] >= 'a' && input_number_info[i + 1] <= 'z') {
+                printf("変数名は1文字である必要があります");
+                exit(1);
+            }
+
+            for (int j = 0; j < 26; j++) {
+                // 式の中にある変数に該当する値が存在しているかを確認
+                if (input_number_info[i] == variable_list.key[j]) {
+                    // 変数を置き換え
+                    input_number_info[i] = variable_list.value[j];
+                }
+            }
+        }
+    }
+}
+
+// 式の実行結果を変数に代入
+void variable_value_set(int load_result) {
+    // 変数フラグ初期化
+    var_def_flag = 0;
+    for (int i = 0; i < 26; i++) {
+        // 変数リスト内から空の場所を探す
+        if (variable_list.key[i] == '\0') {
+            // 変数を代入
+            variable_list.key[i] = input_number_info[0];
+            variable_list.value[i] = load_result + '0';
+            break;
+        }
+    }
+}
+
 void remove_spaces(void) {
-    int i = 0;
     int j = 0;
     for (int i = 0; i < 256; i++) {
         if (input_number_info[i] != ' ') {
@@ -194,7 +255,7 @@ void remove_spaces(void) {
             j++;
         }
     }
-    input_number_info[j] = '\0'; // 文字列の終端を設定
+    //input_number_info[j] = '\0'; // 文字列の終端を設定
 }
 
 int main(void) {
@@ -203,9 +264,14 @@ int main(void) {
         scanf("%255[^\n]%*c", &input_number_info);
         int exit_check_res = exit_check();
         if (exit_check_res == 0) {
-            invalid_value_error_check();
             remove_spaces();
+            variable_flag_check();
+            variable_conversion();
+            invalid_value_error_check();
             int load_result = calculation_or();
+            if (var_def_flag == 1) {
+                variable_value_set(load_result);
+            }
             printf("入力された値は：%d\n", load_result);
             load_point = 0;
         } else {
